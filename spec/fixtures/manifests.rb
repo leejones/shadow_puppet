@@ -1,6 +1,10 @@
 class BlankManifest < ShadowPuppet::Manifest
 end
 
+class ManifestWithTemplateRoot < ShadowPuppet::Manifest
+  configure(:template_root => "my/templates/live/here")
+end
+
 #this does nothing
 class NoOpManifest < ShadowPuppet::Manifest
   def foo
@@ -104,8 +108,4 @@ class TestHelpers < ShadowPuppet::Manifest
     file('baz', :content => 'bar',:mode => '644',:owner => 'rails')
   end
 
-end
-
-class WithTemplateRoot < ShadowPuppet::Manifest
-  configure(:template_root => "my/templates/live/here")
 end
