@@ -73,14 +73,13 @@ EOF
   opts.parse!
 
   require 'shadow_puppet'
-
   require 'active_support/inflector'
   require 'active_support/core_ext/string/inflections'
+  require 'fileutils'
 
   unless String.included_modules.include?(ActiveSupport::CoreExtensions::String::Inflections)
     String.send :include, ActiveSupport::CoreExtensions::String::Inflections
   end
-  require 'fileutils'
 
   raise ArgumentError if ARGV.empty?
 
@@ -94,7 +93,7 @@ EOF
         require file
         if options.guess
           klass = File.basename(file, ".rb").underscore
-          m = klass.camelize.constantize
+          m = klass.classify.constantize
           manifests << m if ShadowPuppet::Manifest >= m
         end
       elsif file =~ /\.yml$/
@@ -127,7 +126,7 @@ EOF
   manifests.each do |m|
     conf_matches = conf_files.select { |c| c =~ /#{m.to_s.underscore}/ }
     if global_config.empty? && conf_matches.empty?
-      m.new().execute!
+      @noop ? m.new().noop : m.new().execute!
     else
       m_config = Hash.new(global_config)
       conf_matches.each do |f|
@@ -138,27 +137,17 @@ EOF
           raise "Can't parse yaml configuration file: #{f}"
         end
       end
-      m.new(m_config).execute!
+      @noop ? m.new().noop : m.new(m_config).execute!
     end
 
   end
   exit(0)
 
-  klass = File.basename(filename, ".rb")
-  require filename
-  manifest = klass.camelize.constantize.new
-
-  if @noop
-    manifest.noop
-  else
-    manifest.execute!
-  end
-
-  exit(0)
-
-rescue Errno::EACCES
-  puts "Please run shadow_puppet as root"
-rescue Exception => e
+  rescue Errno::EACCES
+    puts "Please run shadow_puppet as root"
+  
+  rescue Exception => e
+  
   if e.instance_of?(SystemExit)
     raise
   else

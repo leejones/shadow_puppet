@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
     "lib/shadow_puppet.rb",
     "lib/shadow_puppet/manifest.rb",
     "lib/shadow_puppet/core_ext.rb",
+    "lib/shadow_puppet/template.rb",
     "lib/shadow_puppet/test.rb"
   ]
   s.require_paths = ["lib"]
