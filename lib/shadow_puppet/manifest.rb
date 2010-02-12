@@ -42,6 +42,11 @@ module ShadowPuppet
   #   m = ManifestExample.new
   #   m.execute
   #
+  # Or, to do a dry run:
+  #
+  #   m = ManifestExample.new
+  #   m.noop
+  #
   # As shown in the +sample+ method in ManifestExample above, instance
   # methods are created for each Puppet::Type available on your system. These
   # methods behave identally to the Puppet Resources methods. See here[http://reductivelabs.com/trac/puppet/wiki/TypeReference]
@@ -267,6 +272,30 @@ module ShadowPuppet
       true
     ensure
       @executed = true
+    end
+
+    # Perform a dry run (no-op) execution of this manifest.
+    def noop(force=false)
+      old_noop_value = Puppet[:noop]
+      Puppet[:noop] = true
+      execute(force)
+      Puppet[:noop] = old_noop_value
+    end
+
+    # Perform a dry run (no-op) execution of this manifest.
+    def noop!(force=false)
+      old_noop_value = Puppet[:noop]
+      Puppet[:noop] = true
+      execute!(force)
+      Puppet[:noop] = old_noop_value
+    end
+
+    # Grab the contects of a file which may or may not have ERB in it.
+    def template(file, locals = {})
+      raise(ArgumentError, "Must set configure(:template_root => '/path/to/templates/')") unless configuration.has_key?(:template_root)
+
+      template = Template.new(File.join(configuration[:template_root], file), locals)
+      template.render
     end
 
     protected

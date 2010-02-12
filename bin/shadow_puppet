@@ -64,7 +64,12 @@ EOF
     opts.on( '-N', '--no-guess', 'Dont guess Manifest class names from their filename' ) {
       options.guess = false }
 
+    opts.on('--noop', "Don't actually apply changes -- just show what would have happened") do
+      @noop = true
+    end
+
   end
+
   opts.parse!
 
   require 'shadow_puppet'
@@ -137,6 +142,18 @@ EOF
     end
 
   end
+  exit(0)
+
+  klass = File.basename(filename, ".rb")
+  require filename
+  manifest = klass.camelize.constantize.new
+
+  if @noop
+    manifest.noop
+  else
+    manifest.execute!
+  end
+
   exit(0)
 
 rescue Errno::EACCES
