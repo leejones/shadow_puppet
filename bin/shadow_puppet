@@ -93,7 +93,7 @@ EOF
         require file
         if options.guess
           klass = File.basename(file, ".rb").underscore
-          m = klass.classify.constantize
+          m = klass.camalize.constantize
           manifests << m if ShadowPuppet::Manifest >= m
         end
       elsif file =~ /\.yml$/
